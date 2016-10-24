@@ -18,7 +18,7 @@ struct btnode
 
  
 
-void delete1();
+void delete1(struct btnode *t);
 
 void insert();
 
@@ -142,7 +142,7 @@ void insert()
 
     else    
 
-        search(root);    
+        search1(root);    
 
 }
 
