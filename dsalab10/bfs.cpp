@@ -1,84 +1,139 @@
-// Program to print BFS traversal from a given source vertex. BFS(int s) 
-// traverses vertices reachable from s.
-#include<iostream>
-#include <list>
- 
-using namespace std;
- 
-// This class represents a directed graph using adjacency list representation
-class Graph
-{
-    int V;    // No. of vertices
-    list<int> *adj;    // Pointer to an array containing adjacency lists
-public:
-    Graph(int V);  // Constructor
-    void addEdge(int v, int w); // function to add an edge to graph
-    void BFS(int s);  // prints BFS traversal from a given source s
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+#define MAX 5
+
+struct Vertex {
+   char label;
+   bool visited;
 };
- 
-Graph::Graph(int V)
-{
-    this->V = V;
-    adj = new list<int>[V];
+
+//queue variables
+
+int queue[MAX];
+int rear = -1;
+int front = 0;
+int queueItemCount = 0;
+
+//graph variables
+
+//array of vertices
+struct Vertex* lstVertices[MAX];
+
+//adjacency matrix
+int adjMatrix[MAX][MAX];
+
+//vertex count
+int vertexCount = 0;
+
+
+//queue functions
+
+void insert(int data) {
+   queue[++rear] = data;
+   queueItemCount++;
 }
- 
-void Graph::addEdge(int v, int w)
-{
-    adj[v].push_back(w); // Add w to v’s list.
+
+int removeData() {
+   queueItemCount--;
+   return queue[front++]; 
 }
- 
-void Graph::BFS(int s)
-{
-    // Mark all the vertices as not visited
-    bool *visited = new bool[V];
-    for(int i = 0; i < V; i++)
-        visited[i] = false;
- 
-    // Create a queue for BFS
-    list<int> queue;
- 
-    // Mark the current node as visited and enqueue it
-    visited[s] = true;
-    queue.push_back(s);
- 
-    // 'i' will be used to get all adjacent vertices of a vertex
-    list<int>::iterator i;
- 
-    while(!queue.empty())
-    {
-        // Dequeue a vertex from queue and print it
-        s = queue.front();
-        cout << s << " ";
-        queue.pop_front();
- 
-        // Get all adjacent vertices of the dequeued vertex s
-        // If a adjacent has not been visited, then mark it visited
-        // and enqueue it
-        for(i = adj[s].begin(); i != adj[s].end(); ++i)
-        {
-            if(!visited[*i])
-            {
-                visited[*i] = true;
-                queue.push_back(*i);
-            }
-        }
-    }
+
+bool isQueueEmpty() {
+   return queueItemCount == 0;
 }
+
+//graph functions
+
+//add vertex to the vertex list
+void addVertex(char label) {
+   struct Vertex* vertex = (struct Vertex*) malloc(sizeof(struct Vertex));
+   vertex->label = label;  
+   vertex->visited = false;     
+   lstVertices[vertexCount++] = vertex;
+}
+
+//add edge to edge array
+void addEdge(int start,int end) {
+   adjMatrix[start][end] = 1;
+   adjMatrix[end][start] = 1;
+}
+
+//display the vertex
+void displayVertex(int vertexIndex) {
+   printf("%c ",lstVertices[vertexIndex]->label);
+}       
+
+//get the adjacent unvisited vertex
+int getAdjUnvisitedVertex(int vertexIndex) {
+   int i;
+	
+   for(i = 0; i<vertexCount; i++) {
+      if(adjMatrix[vertexIndex][i] == 1 && lstVertices[i]->visited == false)
+         return i;
+   }
+	
+   return -1;
+}
+
+void breadthFirstSearch() {
+   int i;
+
+   //mark first node as visited
+   lstVertices[0]->visited = true;
+
+   //display the vertex
+   displayVertex(0);   
+
+   //insert vertex index in queue
+   insert(0);
+   int unvisitedVertex;
+
+   while(!isQueueEmpty()) {
+      //get the unvisited vertex of vertex which is at front of the queue
+      int tempVertex = removeData();   
+
+      //no adjacent vertex found
+      while((unvisitedVertex = getAdjUnvisitedVertex(tempVertex)) != -1) {    
+         lstVertices[unvisitedVertex]->visited = true;
+         displayVertex(unvisitedVertex);
+         insert(unvisitedVertex);               
+      }
+		
+   }   
+
+   //queue is empty, search is complete, reset the visited flag        
+   for(i = 0;i<vertexCount;i++) {
+      lstVertices[i]->visited = false;
+   }    
+}
+
+int main() {
+   int i, j;
+
+   for(i = 0; i<MAX; i++) // set adjacency {
+      for(j = 0; j<MAX; j++) // matrix to 0
+         adjMatrix[i][j] = 0;
+   }
+
+   addVertex('S');   // 0
+   addVertex('A');   // 1
+   addVertex('B');   // 2
+   addVertex('C');   // 3
+   addVertex('D');   // 4
  
-// Driver program to test methods of graph class
-int main()
-{
-    // Create a graph given in the above diagram
-    Graph g(4);
-    g.addEdge(0, 1);
-    g.addEdge(0, 2);
-    g.addEdge(1, 2);
-    g.addEdge(2, 0);
-    g.addEdge(2, 3);
-    g.addEdge(3, 3);
- 
-    cout << "Following is Breadth First Traversal (starting from vertex 2) \n";
-    g.BFS(2);
- 
-    return 0;
+   addEdge(0, 1);    // S - A
+   addEdge(0, 2);    // S - B
+   addEdge(0, 3);    // S - C
+   addEdge(1, 4);    // A - D
+   addEdge(2, 4);    // B - D
+   addEdge(3, 4);    // C - D
+	
+   
+   printf("\nBreadth First Search: ");
+   
+   breadthFirstSearch();
+
+   return 0;
 }
